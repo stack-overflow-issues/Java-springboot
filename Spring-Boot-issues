@@ -1,0 +1,78 @@
+If there’s no controller, no API layer, then you’re likely working on:
+
+Backend workers/services (like Kafka consumers, schedulers, cron jobs, message processors)
+
+Or internal libraries/modules used by other apps
+
+Possibly even batch jobs or data pipelines
+
+
+That’s why it feels like:
+
+> “What the hell is this app even doing?”
+
+
+
+
+---
+
+Here's how to understand such apps:
+
+1. Search for @KafkaListener, @Scheduled, CommandLineRunner, ApplicationRunner
+
+These are entry points in non-API apps.
+
+Example:
+
+@KafkaListener(topics = "some-topic")
+public void consume(String message) {
+    ...
+}
+
+or
+
+@Scheduled(cron = "0 0 * * * *")
+public void runJob() {
+    ...
+}
+
+
+---
+
+2. Check main method (SpringBootApplication)
+
+Sometimes they trigger runners or consumers from there.
+
+
+---
+
+3. Look for listener, consumer, job, or processor packages
+
+These contain the real logic triggers — not Controller but something like:
+
+UserEventProcessor.java
+
+AccountSyncListener.java
+
+
+
+---
+
+4. Check application logs or bootstrap
+
+Often the logs say:
+
+> "Starting XYZService..."
+"Consuming from topic..."
+"Batch Job Started..."
+
+
+
+Match that with classes.
+
+
+---
+
+5. Ask this to your team (1 simple question):
+
+> “Hey, what triggers this app? Is it Kafka, cron, or some input file? Just trying to understand the flow.”
